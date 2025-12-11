@@ -1,7 +1,7 @@
 // ====================================================================
 // BASE DE DATOS COMPLETA DE LA MALLA CURRICULAR (10 SEMESTRES)
+// NOTA: Se incluyen los IDs y requisitos de las electivas principales para un manejo estricto
 // ====================================================================
-// type: 'cb' (Ciencias Básicas), 'ci' (Ingeniería), 'ia' (Aeroespacial), 'hu' (Humanidades)
 const materias = [
     // --- Nivel I ---
     { id: "calcdif", nombre: "Cálculo Diferencial", sem: 1, cred: 4, req: [], type: "cb" },
@@ -81,7 +81,13 @@ const materias = [
     { id: "elecia3", nombre: "Electiva Ing. Aplicada 3", sem: 10, cred: 3, req: [], type: "ia" },
     { id: "elecp3", nombre: "Electiva Profundización 3", sem: 10, cred: 3, req: [], type: "ia" },
     { id: "elecia4", nombre: "Electiva Ing. Aplicada 4", sem: 10, cred: 3, req: [], type: "ia" },
-    { id: "eng5", nombre: "English V (Nivel 10)", sem: 10, cred: 2, req: [], type: "hu" },
+    { id: "english5", nombre: "English V (Nivel 10)", sem: 10, cred: 2, req: [], type: "hu" },
+
+    // --- Electivas con Requisitos por Créditos (Aproximación) ---
+    // La mayoría de electivas Sociohumanísticas y Libres requieren 60 o 30 créditos, 
+    // lo cual se simula de forma sencilla aquí.
+    { id: "el_cred_30", nombre: "Electiva (30 Créditos)", sem: 3, cred: 3, req: ["calcint", "alg", "fis1"], type: "hu" }, 
+    { id: "el_cred_60", nombre: "Electiva (60 Créditos)", sem: 4, cred: 3, req: ["elec1", "solidos", "manuf"], type: "hu" }, 
 ];
 
 
@@ -150,6 +156,7 @@ function renderMalla() {
             // Eventos
             card.addEventListener('mouseenter', () => highlightConnections(m.id));
             card.addEventListener('mouseleave', resetHighlights);
+            // El evento click llama a la función de validación estricta
             card.addEventListener('click', () => toggleCompletion(m.id, isCompleted, isAvailable));
 
             col.appendChild(card);
@@ -160,46 +167,51 @@ function renderMalla() {
 }
 
 /**
- * 2. Maneja el clic para marcar/desmarcar una materia y recalcula el estado de la malla.
+ * 2. Maneja el clic para marcar/desmarcar una materia con validación estricta.
  * @param {string} id - ID de la materia clickeada.
  * @param {boolean} wasCompleted - Si la materia estaba marcada como completada.
- * @param {boolean} isAvailable - Si la materia está disponible para ser marcada.
+ * @param {boolean} isAvailable - Si la materia está disponible (prerrequisitos cumplidos).
  */
 function toggleCompletion(id, wasCompleted, isAvailable) {
-    // Si ya está completada, la desmarcamos
+    const materia = materias.find(m => m.id === id);
+
+    // --- LÓGICA DE DESMARCAR (Requisito inverso) ---
     if (wasCompleted) {
-        // Remover del array
-        completedCourses = completedCourses.filter(courseId => courseId !== id);
-        
-        // ¡Validación de Desbloqueo Inverso!
-        // No se puede desmarcar una materia si es prerequisito de alguna que ya está cursada.
+        // Bloquear desmarcación si hay dependientes cursadas
         const dependentCourses = materias.filter(m => m.req.includes(id));
         const blockingCourses = dependentCourses.filter(m => completedCourses.includes(m.id));
 
         if (blockingCourses.length > 0) {
-            alert(`ERROR: No puedes desmarcar ${materias.find(m => m.id === id).nombre} porque es requisito de materias que ya has cursado.`);
-            // Revertir el cambio para evitar inconsistencias
-            completedCourses.push(id); 
+            const names = blockingCourses.map(c => c.nombre).join(', ');
+            alert(`🚫 ERROR: No puedes desmarcar "${materia.nombre}" porque es un prerrequisito de las materias que ya has cursado: ${names}`);
+            return; 
         }
+        
+        // Si no hay bloqueos, desmarcar
+        completedCourses = completedCourses.filter(courseId => courseId !== id);
     } 
-    // Si NO está completada Y está disponible (prerequisitos cubiertos), la marcamos
-    else if (isAvailable) {
-        completedCourses.push(id);
-    } 
-    // Si NO está completada Y NO está disponible, mostramos error
+    // --- LÓGICA DE MARCAR (Requisito directo) ---
     else {
-        showInfo(materias.find(m => m.id === id)); // Muestra los requisitos faltantes
-        return; 
+        if (isAvailable) {
+            completedCourses.push(id);
+        } else {
+            // Mostrar los requisitos faltantes en el panel de información
+            showInfo(materia); 
+            return; // No hacer nada más si está bloqueada
+        }
     }
     
     // Volver a dibujar toda la malla para reflejar el cambio de estado
     renderMalla();
+    
+    // Actualizar el panel de información para el estado actual de la materia (si sigue el hover)
+    highlightConnections(id);
+    showInfo(materia);
 }
 
 
 /**
  * 3. Ilumina las conexiones (pre/post-requisitos) al pasar el mouse.
- * La lógica es la misma, pero ahora ignora el estado inicial de "dimmed" para completed/available.
  */
 function highlightConnections(selectedId) {
     const allCards = document.querySelectorAll('.materia');
@@ -237,6 +249,11 @@ function highlightConnections(selectedId) {
             }
         }
     });
+    
+    // Actualizar el panel de información al hacer hover
+    if (selectedMateria) {
+        showInfo(selectedMateria);
+    }
 }
 
 /**
@@ -251,11 +268,11 @@ function resetHighlights() {
     // Restablecer el panel de información
     infoTitulo.innerText = "Selecciona una materia";
     infoCred.innerText = "-";
-    infoReq.innerText = "Pasa el mouse sobre cualquier asignatura o haz clic para marcar/desmarcar.";
+    infoReq.innerHTML = "Pasa el mouse sobre cualquier asignatura o haz clic para marcar/desmarcar.";
 }
 
 /**
- * 5. Muestra la información detallada en el panel inferior.
+ * 5. Muestra la información detallada en el panel inferior, indicando el estado de los requisitos.
  */
 function showInfo(m) {
     infoTitulo.innerText = `${m.nombre}`;
@@ -266,10 +283,16 @@ function showInfo(m) {
         const found = materias.find(mat => mat.id === rId);
         const name = found ? found.nombre : rId;
         const isMet = completedCourses.includes(rId);
-        return isMet ? `<span style="color: green;">${name} (OK)</span>` : `<span style="color: red;">${name} (FALTA)</span>`;
+        
+        // Colorea el nombre del requisito según su estado (Falta/OK)
+        return isMet 
+            ? `<span style="color: green; font-weight: bold;">✅ ${name} (OK)</span>` 
+            : `<span style="color: red; font-weight: bold;">❌ ${name} (FALTA)</span>`;
     });
 
-    infoReq.innerHTML = reqNombres.length > 0 ? reqNombres.join(' | ') : 'Ninguno (Materia de Nivel I)';
+    infoReq.innerHTML = reqNombres.length > 0 
+        ? reqNombres.join('<br>') 
+        : 'Ninguno (Materia de Nivel I o Electiva sin requisito específico).';
 }
 
 // INICIALIZACIÓN: Dibuja la malla cuando la página carga
