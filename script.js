@@ -9,12 +9,14 @@ const materias = [
     { id: "quim", nombre: "Química General", sem: 1, cred: 3, req: [], type: "cb" },
     { id: "prog1", nombre: "Programación y C. Computacional", sem: 1, cred: 3, req: [], type: "ci" },
     { id: "intro", nombre: "Intro. Ing. Aeroespacial", sem: 1, cred: 2, req: [], type: "ia" },
-    { id: "hum1", nombre: "Sociohumanística I", sem: 1, cred: 2, req: [], type: "hu" },
+    { id: "hum1", nombre: "vivamos la universidad", sem: 1, cred: 1, req: [], type: "hu" },
+    { id: "ing1", nombre: "ingles 1", sem: 1, cred: 2, req: [], type: "hu" },
+
 
     // --- Nivel II ---
     { id: "calcint", nombre: "Cálculo Integral", sem: 2, cred: 4, req: ["calcdif"], type: "cb" },
     { id: "alg", nombre: "Álgebra Lineal", sem: 2, cred: 3, req: ["geom"], type: "cb" },
-    { id: "fis1", nombre: "Física Mecánica", sem: 2, cred: 4, req: ["calcdif"], type: "cb" },
+    { id: "fis1", nombre: "Física Mecánica", sem: 2, cred: 4, req: ["calcdif"] ["geom"], type: "cb" },
     { id: "matsc", nombre: "Ciencia de los Materiales", sem: 2, cred: 3, req: ["quim"], type: "ci" },
     { id: "estat", nombre: "Estática", sem: 2, cred: 3, req: ["fis1", "geom"], type: "ci" },
     { id: "hum2", nombre: "Sociohumanística II", sem: 2, cred: 2, req: ["hum1"], type: "hu" },
@@ -297,3 +299,4 @@ function showInfo(m) {
 
 // INICIALIZACIÓN: Dibuja la malla cuando la página carga
 document.addEventListener('DOMContentLoaded', renderMalla);
+
