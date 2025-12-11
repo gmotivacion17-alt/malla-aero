@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Malla Curricular Interactiva - Ingeniería Aeroespacial</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Malla Curricular - Ingeniería Aeroespacial</h1>
+        <p>Pasa el cursor sobre una materia para ver sus requisitos y las que habilita.</p>
+        
+        <div class="leyenda">
+            <span class="dot cb"></span> Ciencias Básicas
+            <span class="dot ci"></span> Ciencias de la Ingeniería
+            <span class="dot ia"></span> Ingeniería Aeroespacial
+            <span class="dot hu"></span> Humanidades / Complementarias
+        </div>
+    </header>
+
+    <div id="malla-container" class="malla-wrapper">
+        </div>
+
+    <div id="info-panel">
+        <h3 id="info-titulo">Selecciona una materia</h3>
+        <p><strong>Créditos:</strong> <span id="info-creditos">-</span></p>
+        <p><strong>Requisitos:</strong> <span id="info-requisitos">Pasa el mouse sobre cualquier asignatura.</span></p>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
