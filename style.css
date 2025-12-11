@@ -49,7 +49,7 @@ header {
     display: flex;
     gap: 15px;
     overflow-x: auto;
-    padding-bottom: 30px;
+    padding-bottom: 120px; /* Espacio para el panel de información */
     flex-grow: 1;
 }
 
@@ -79,7 +79,6 @@ header {
     border-radius: 6px;
     padding: 10px;
     font-size: 0.9em;
-    cursor: pointer;
     transition: all 0.3s ease;
     box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
     text-align: center;
@@ -102,7 +101,7 @@ header {
 .cat-hu { background-color: var(--color-hu); }
 
 
-/* Estado: BLOQUEADA */
+/* Estado: BLOQUEADA (No se puede hacer clic) */
 .materia.locked {
     background-color: var(--color-locked);
     opacity: 0.6;
@@ -130,6 +129,10 @@ header {
 .materia.completed:hover {
     transform: scale(1.05);
     box-shadow: 0 5px 15px rgba(76, 175, 80, 1.0);
+}
+.materia.locked:hover {
+    /* El hover para bloqueado solo muestra info, no cambia la tarjeta */
+    box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
 }
 
 
